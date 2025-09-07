@@ -1,18 +1,68 @@
 import { WebSocketServer } from "ws";
+
 const wss = new WebSocketServer({ port: 9090 });
+let rooms = [];
 
-let allSocket = [];
 wss.on("connection", (socket) => {
-  allSocket.push(socket);
-  console.log("websocket server is connect at port 9090");
+  console.log("user connected to server");
   socket.on("message", (data) => {
-    console.log("message received on server", data.toString());
-    allSocket.forEach((s) => {
-      s.send(data.toString() + ": sent from the server");
-    });
+    let newData = JSON.parse(data.toString());
 
-    socket.on("disconnect", () => {
-      allSocket.filter((s) => s != socket);
-    });
+    if (newData.type === "join-room") {
+      const user = {
+        id: data.now,
+        roomid: newData.data.roomid,
+        socket: socket,
+        username: newData.data.username,
+      };
+      rooms.push(user);
+
+      const allUser = [];
+      rooms.forEach(
+        (item) => (
+          item.roomid === newData.data.roomid, allUser.push(item.username)
+        )
+      );
+      socket.send(
+        JSON.stringify({
+          type: "room-info",
+          data: {
+            users: allUser,
+          },
+        })
+      );
+      // console.log("room join", roomid);
+    }
+    let roomid = "";
+    if (newData.type === "chat") {
+      const user = rooms.find((u) => u.socket === socket);
+      if (!user) return;
+
+      console.log("user found in room", user.roomid);
+
+      // broadcast to same room
+      rooms
+        .filter((u) => u.roomid == user.roomid)
+        .forEach((u) => {
+          u.socket.send(
+            JSON.stringify({
+              type: "messageFromServer",
+              data: {
+                message: newData.data.message,
+                sender: user.id,
+                username: newData.data.username,
+              },
+            })
+          );
+        });
+    }
+  });
+  socket.on("close", () => {
+    rooms = rooms.filter((r) => r.socket !== socket);
+    console.log("user disconnected");
   });
 });
+
+// wss.connectionn (socket)
+
+//router.post(req,res)

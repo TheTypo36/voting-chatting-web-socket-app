@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useId } from "react";
-
+import { useNavigate } from "react-router-dom";
 function RoomPage() {
+  const navigate = useNavigate();
   const id = useId();
   const [username, setUsername] = useState("");
   const [roomid, setRoomid] = useState("");
@@ -18,6 +19,14 @@ function RoomPage() {
       alert("RoomId is copied to clipboard");
     });
   };
+  const handleJoinRoom = () => {
+    if (roomid === "" || username === "") {
+      alert("please enter username and roomid");
+      return;
+    }
+    navigate(`/chat/${roomid}/${username}`);
+  };
+
   return (
     <div className="bg-black flex flex-col justify-center h-screen items-center text-white">
       <form className="w-100 h-80 bg-white rounded-xl flex flex-col items-center pt-10">
@@ -52,7 +61,10 @@ function RoomPage() {
             copy
           </button>
         </div>
-        <button className="bg-green-600 p-2 h-10 w-40 text-center rounded-md m-5">
+        <button
+          onClick={handleJoinRoom}
+          className="bg-green-600 p-2 h-10 w-40 text-center rounded-md m-5"
+        >
           Join
         </button>
       </form>

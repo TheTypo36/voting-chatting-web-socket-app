@@ -7,7 +7,8 @@ function App() {
        justify-around"
       >
         <h1 className="text-3xl">
-          Welcome to Polling websocket project. Let's get started..🎉
+          Welcome to Ashish's websocket project, disappearing message chat Room
+          Service. Let's get started..🎉
         </h1>
         <Link
           to="/configure-room"

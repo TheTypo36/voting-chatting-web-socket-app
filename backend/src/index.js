@@ -23,14 +23,18 @@ wss.on("connection", (socket) => {
           item.roomid === newData.data.roomid, allUser.push(item.username)
         )
       );
-      socket.send(
-        JSON.stringify({
-          type: "room-info",
-          data: {
-            users: allUser,
-          },
-        })
-      );
+      rooms
+        .filter((u) => u.roomid === newData.data.roomid)
+        .forEach((u) => {
+          u.socket.send(
+            JSON.stringify({
+              type: "room-info",
+              data: {
+                users: allUser,
+              },
+            })
+          );
+        });
       // console.log("room join", roomid);
     }
     let roomid = "";
@@ -58,7 +62,25 @@ wss.on("connection", (socket) => {
     }
   });
   socket.on("close", () => {
+    const users = rooms.filter((u) => u.socket === socket);
+
+    if (!users) return;
+
     rooms = rooms.filter((r) => r.socket !== socket);
+    const allUsers = rooms
+      .filter((u) => u.roomid === users.roomid)
+      .map((u) => u.username);
+
+    rooms
+      .filter((u) => u.roomid === users.roomid)
+      .forEach((u) => {
+        u.socket.send(
+          JSON.stringify({
+            type: "room-info",
+            data: { users: allUsers },
+          })
+        );
+      });
     console.log("user disconnected");
   });
 });

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 
 function Chat() {
   const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState("");
   const [allmessage, setAllMessage] = useState([]);
+  const messageRef = useRef([]);
   const [allUsers, setAllUsers] = useState([]);
   const { roomid, username } = useParams();
 
@@ -26,7 +27,8 @@ function Chat() {
         setAllUsers(newData.data.users);
       }
       if (newData.type === "messageFromServer") {
-        setAllMessage((prev) => [...prev, newData.data]);
+        messageRef.current = [...messageRef.current, newData.data];
+        setAllMessage([...messageRef.current]);
       }
     };
 
@@ -52,7 +54,7 @@ function Chat() {
     <div className="min-h-screen w-full bg-cyan-100 flex flex-col py-4 px-2 sm:px-4">
       <div className="w-full mt-10 max-w-[85vw] flex flex-row justify-between items-center mb-4 text-base sm:text-lg font-bold">
         <span className="bg-black text-red-400 p-2 rounded-md text-xs sm:text-base">
-          RoomId: {roomid && roomid?.toUpperCase()}
+          RoomId: {roomid && roomid}
         </span>
         <span className="bg-black text-green-700 p-2 rounded-md text-xs sm:text-base">
           Online Users: {allUsers.length}

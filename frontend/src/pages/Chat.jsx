@@ -10,7 +10,7 @@ function Chat() {
   const { roomid, username } = useParams();
 
   useEffect(() => {
-    const ws = new WebSocket("ws://0.0.0.0:9090");
+    const ws = new WebSocket(`ws://${window.location.host}:9090`);
 
     ws.onopen = () => {
       setSocket(ws);
